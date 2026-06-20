@@ -6,7 +6,7 @@ from services.transcriber import transcribe_audio # Assuming you put the Groq co
 app = FastAPI()
 
 @app.get("/summarize")
-def summarize(url: str):
+def summarize(url: str,language: str = "English"):
     # 1. Attempt to get subtitles
     transcript = fetch_transcript(url)
     
@@ -15,6 +15,6 @@ def summarize(url: str):
         transcript = transcribe_audio(url)
     
     # 3. Generate the summary using Gemini
-    summary = generate_summary(transcript)
+    summary = generate_summary(transcript, target_language=language)
     
     return {"status": "success", "summary": summary}
