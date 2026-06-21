@@ -78,6 +78,14 @@ Open the URL shown by Streamlit (typically `http://localhost:8501`), paste a You
 
 For videos that require authentication, place a `cookies.txt` file in the project root. It is used by yt-dlp during audio transcription fallback. This file is gitignored and must be exported from your browser separately.
 
+## Planned features
+
+The following capabilities are not implemented yet but are planned for future releases:
+
+- **Batch processing** — Summarize multiple videos at once (e.g. a playlist or pasted URL list) instead of one URL at a time, reducing wait time for study sessions or research workflows.
+- **Export options** — Export summaries to Notion, Anki, PDF, or Markdown for note-taking, flashcards, or offline reading.
+- **Customizable summary length** — Let users choose a brief overview or a detailed breakdown so output matches how much depth they need.
+
 ## Project layout
 
 ```
