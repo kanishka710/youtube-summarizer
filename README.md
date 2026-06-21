@@ -11,6 +11,7 @@ This app runs as **two separate processes**:
 2. **Streamlit frontend** (`app.py`) — UI that calls the backend at `http://127.0.0.1:8000` by default
 
 Both must be running for the UI to work.
+<img width="1337" height="630" alt="image" src="https://github.com/user-attachments/assets/6096fb8c-0452-4320-8837-bc5197902f41" />
 
 ## Prerequisites
 
