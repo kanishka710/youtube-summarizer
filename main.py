@@ -1,40 +1,58 @@
+"""FastAPI backend for YouTube video summarization."""
+
+import logging
+
 from fastapi import FastAPI, HTTPException
-from services.extractor import get_video_id, fetch_transcript
+
+from services.cache import get_cached_summary, set_cached_summary
+from services.extractor import TranscriptNotFoundError, fetch_transcript, get_video_id
 from services.llm import generate_summary
 from services.transcriber import transcribe_audio
-from services.cache import get_cached_summary, set_cached_summary
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+
+def _get_transcript(video_url: str, video_id: str) -> str:
+    """Fetch transcript from captions, falling back to audio transcription."""
+    try:
+        return fetch_transcript(video_url, video_id=video_id)
+    except TranscriptNotFoundError as exc:
+        logger.info("Caption fetch failed, falling back to audio: %s", exc)
+        try:
+            return transcribe_audio(video_url)
+        except Exception as fallback_exc:
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    "Could not extract transcript. The video may be private "
+                    f"or protected by anti-bot measures. ({fallback_exc})"
+                ),
+            ) from fallback_exc
+
+
 @app.get("/summarize")
-def summarize(url: str,language: str = "English"):
+def summarize(url: str, language: str = "English"):
+    """Summarize a YouTube video by URL in the requested language."""
     try:
         video_id = get_video_id(url)
-        
-        # 1. CHECK CACHE
+        if not video_id:
+            raise HTTPException(status_code=400, detail="Invalid YouTube URL")
+
         cached = get_cached_summary(video_id, language)
         if cached:
             return {"status": "success", "source": "cache", "summary": cached}
-        
-        # 2. COMPUTE (If cache miss)
-        # Attempt to get subtitles
-        transcript = fetch_transcript(url)
-        # Fallback: If fetch_transcript returned an error, use Groq/Whisper
-        if "Error" in transcript:
-            try:
-                transcript = transcribe_audio(url)
-            except Exception as e:
-        # If the fallback also fails, tell the user WHY instead of crashing
-                return {"status": "error", "message": "Could not extract transcript. The video may be private or protected by anti-bot measures."}
-        
-        # Generate the summary using Gemini
-        summary = generate_summary(transcript, target_language=language)
-        
-        # 3. STORE RESULT
+
+        transcript = _get_transcript(url, video_id)
+        summary = generate_summary(transcript, language=language)
         set_cached_summary(video_id, language, summary)
 
         return {"status": "success", "source": "llm", "summary": summary}
-    except Exception as e:
-        # Log the error and tell the user exactly what happened
-        print(f"Error encountered: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to process video: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Failed to process video")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to process video: {exc}"
+        ) from exc
