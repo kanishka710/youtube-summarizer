@@ -1,6 +1,7 @@
 # YouTube Video Summarizer
 
 Summarize YouTube videos from a URL. The app extracts captions when available, falls back to audio transcription via Groq Whisper when needed, and generates a structured summary with Gemini. Results are cached in Upstash Redis.
+<img width="1726" height="802" alt="image" src="https://github.com/user-attachments/assets/83a4a760-af2e-485e-9426-1ecb98730c00" />
 
 ## Architecture
 
