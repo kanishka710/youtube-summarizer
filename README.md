@@ -13,6 +13,23 @@ This app runs as **two separate processes**:
 Both must be running for the UI to work.
 <img width="1337" height="630" alt="image" src="https://github.com/user-attachments/assets/6096fb8c-0452-4320-8837-bc5197902f41" />
 
+## Project layout
+
+```
+youtube-summarizer/
+├── main.py              # FastAPI backend
+├── app.py               # Streamlit frontend
+├── requirements.txt     # Runtime dependencies
+├── pyproject.toml       # Project metadata and Black config
+└── services/
+    ├── config.py        # Environment and constants
+    ├── cache.py         # Redis summary cache
+    ├── extractor.py     # YouTube caption extraction
+    ├── transcriber.py   # Audio download + Groq Whisper
+    ├── llm.py           # Gemini summarization
+    └── utils.py         # Timestamp helpers
+```
+
 ## Prerequisites
 
 - Python 3.11 or newer
@@ -87,20 +104,3 @@ The following capabilities are not implemented yet but are planned for future re
 - **Batch processing** — Summarize multiple videos at once (e.g. a playlist or pasted URL list) instead of one URL at a time, reducing wait time for study sessions or research workflows.
 - **Export options** — Export summaries to Notion, Anki, PDF, or Markdown for note-taking, flashcards, or offline reading.
 - **Customizable summary length** — Let users choose a brief overview or a detailed breakdown so output matches how much depth they need.
-
-## Project layout
-
-```
-youtube-summarizer/
-├── main.py              # FastAPI backend
-├── app.py               # Streamlit frontend
-├── requirements.txt     # Runtime dependencies
-├── pyproject.toml       # Project metadata and Black config
-└── services/
-    ├── config.py        # Environment and constants
-    ├── cache.py         # Redis summary cache
-    ├── extractor.py     # YouTube caption extraction
-    ├── transcriber.py   # Audio download + Groq Whisper
-    ├── llm.py           # Gemini summarization
-    └── utils.py         # Timestamp helpers
-```
